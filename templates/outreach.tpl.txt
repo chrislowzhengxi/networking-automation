@@ -1,0 +1,6 @@
+Hi {first_name},
+
+I’m Chris Low, a UChicago CS & Econ senior. I applied to {company}’s {role} program and saw we both {personal_note}. Could we set up a 15-minute chat next week?
+
+Best,
+Chris
