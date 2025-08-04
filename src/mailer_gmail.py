@@ -5,7 +5,7 @@ import random
 import time
 import os
 
-from datetime import datetime
+from datetime import datetime, timezone
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
@@ -33,8 +33,7 @@ def append_to_log(key, cced):
         writer = csv.writer(f)
         if write_header:
             writer.writerow(["key", "cced", "timestamp"])
-        writer.writerow([key, cced, datetime.utcnow().isoformat()])
-
+        writer.writerow([key, cced, datetime.now(timezone.utc).isoformat()])
 
 def load_prospects():
     with open(CSV, newline="") as f:
@@ -73,7 +72,7 @@ if __name__ == "__main__":
         seen_keys.add(key)
 
         to_addr = f"{p['first_name'].lower()}.{p['last_name'].lower()}@{p['company_domain']}"
-        subj    = f"Chat about {p['company']} {p['role']} role?"     # Modify it later 
+        subj    = f"UChicago Twins Curious About Your Path at {p['company']} – {p['first_name']}"    # Modify it later 
         body    = template.format(**p)
         cc_flag = p.get("cced", "").strip().lower() == "yes"
 
