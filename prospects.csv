@@ -1,4 +1,4 @@
-first_name,last_name,company,role,company_domain,personal_note
-Edwin,Low,TI,Janitor,ti.com,Look Similar
-Edwin,Low,Rice,Janitor,rice.edu,look similar
-Chris,Low,Rice,Janitor,rice.edu,look similar
+first_name,last_name,company,role,company_domain,cced
+Edwin,Low,Goldman Sachs,Janitor,ti.com,no
+Edwin,Low,Goldman Sachs,Janitor,rice.edu,yes
+Chris,Low,Goldman Sachs,Janitor,rice.edu,yes
