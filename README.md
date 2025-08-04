@@ -61,6 +61,8 @@ If you get a CERTIFICATE_VERIFY_FAILED error when sending emails, run this once:
 `open "/Applications/Python 3.12/Install Certificates.command"`
 This installs missing root certificates needed for secure connections on macOS.
 
+## 🛡️ Duplicate Protection: 
+The script maintains a sent_log.csv file to track all previously contacted recipients. It uses a combination of first name, last name, and domain to prevent sending to the same person twice — even across different runs.
 
 ## 🛡️ Safety Tips
 - Send in small batches (e.g., 10–20/hr)
