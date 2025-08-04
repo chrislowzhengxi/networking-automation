@@ -1,3 +1,4 @@
+import argparse
 import csv
 import ssl
 import random
@@ -7,6 +8,10 @@ import os
 from datetime import datetime
 from email.message import EmailMessage
 from dotenv import load_dotenv
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--preview", action="store_true", help="Preview emails before sending")
+args = parser.parse_args()
 
 load_dotenv()
 USER = os.getenv("GMAIL_USER")
@@ -21,7 +26,7 @@ def load_sent_log():
     with open(LOG, newline="") as f:
         return {row["key"] for row in csv.DictReader(f)}
 
-def append_to_log(email, cced):
+def append_to_log(key, cced):
     write_header = not os.path.exists(LOG)
     with open(LOG, "a", newline="") as f:
         writer = csv.writer(f)
@@ -72,6 +77,19 @@ if __name__ == "__main__":
         cc_flag = p.get("cced", "").strip().lower() == "yes"
 
         print(f"Would send to {to_addr}{' (CC: Edwin)' if cc_flag else ''}")
+
+        print("\n--- Email Preview ---")
+        print(f"To     : {to_addr}")
+        print(f"Subject: {subj}")
+        print(f"Body   :\n{body}")
+        print("---------------------\n")
+
+        if args.preview:
+            confirm = input("Send this email? (y/n): ").strip().lower()
+            if confirm != "y":
+                print("Skipped.\n")
+                continue
+
         send_mail(to_addr, subj, body, cced=cc_flag)  # uncomment to actually send
         append_to_log(key, cc_flag)
 
