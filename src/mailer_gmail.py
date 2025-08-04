@@ -18,6 +18,7 @@ USER = os.getenv("GMAIL_USER")
 PASS = os.getenv("GMAIL_APP_PASS")
 CSV  = os.getenv("CSV_PATH")
 TPL  = os.getenv("TEMPLATE")
+NAME = os.getenv("GMAIL_NAME")
 
 LOG  = os.path.join(os.path.dirname(__file__), "../sent_log.csv")
 def load_sent_log():
@@ -41,7 +42,7 @@ def load_prospects():
 
 def send_mail(recipient, subject, body, cced=False):
     msg = EmailMessage()
-    msg["From"]    = USER
+    msg["From"] = f"{NAME} <{USER}>"
     msg["To"]      = recipient
     msg["Subject"] = subject
 
