@@ -1,4 +1,4 @@
 first_name,last_name,company,role,company_domain,cced
-Edwin,Low,Goldman Sachs,Janitor,ti.com,no
 Edwin,Low,Goldman Sachs,Janitor,rice.edu,yes
-Chris,Low,Goldman Sachs,Janitor,rice.edu,yes
+Edwin,Low,Goldman Sachs,Managing Director,rice.edu,yes
+Chris,Low,Rice,Student,rice.edu,no
