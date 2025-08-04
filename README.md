@@ -56,6 +56,11 @@ Chris
 
 6. Run: `python src/mailer_gmail.py`
 
+## 🧰 Note: macOS SSL Fix (if using Python from python.org)
+If you get a CERTIFICATE_VERIFY_FAILED error when sending emails, run this once:
+`open "/Applications/Python 3.12/Install Certificates.command"`
+This installs missing root certificates needed for secure connections on macOS.
+
 
 ## 🛡️ Safety Tips
 - Send in small batches (e.g., 10–20/hr)
