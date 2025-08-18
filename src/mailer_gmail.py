@@ -72,7 +72,7 @@ if __name__ == "__main__":
         seen_keys.add(key)
 
         to_addr = f"{p['first_name'].lower()}.{p['last_name'].lower()}@{p['company_domain']}"
-        subj    = f"UChicago Twins Curious About Your Path at {p['company']} – {p['first_name']}"    
+        subj    = f"UChicago and Rice Twins Curious About Your Path at {p['company']} – {p['first_name']}"    
         body    = template.format(**p)
         cc_flag = p.get("cced", "").strip().lower() == "yes"
 
