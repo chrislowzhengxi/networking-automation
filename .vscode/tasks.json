@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Cover Letter Wizard",
+      "type": "shell",
+      "command": "${workspaceFolder}/venv/bin/python",
+      "args": ["cli.py", "cover", "wizard"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Email Wizard",
+      "type": "shell",
+      "command": "${workspaceFolder}/venv/bin/python",
+      "args": ["cli.py", "email", "wizard"],
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,1 +1,8 @@
 python-dotenv
+docx2pdf
+jinja2
+typer[all]
+rich
+InquirerPy
+pydantic
+pyyaml
