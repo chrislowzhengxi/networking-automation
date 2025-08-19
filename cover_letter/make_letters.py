@@ -172,10 +172,7 @@ def main():
 
     tpl = Path(args.template)
     outdir = Path(args.outdir); outdir.mkdir(parents=True, exist_ok=True)
-
-    # <<< populate this after you tell me exactly what to bold
-    ALWAYS_BOLD = []  # e.g., ["Media Reporter", "Data Analyst with the Chicago Bulls"]
-
+    
     def generate_one(company: str, position: str = ""):
         safe = company.replace("/", "-").replace("\\", "-").strip()
         basename = f"Chris Low {safe} Cover Letter"
