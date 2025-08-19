@@ -4,9 +4,9 @@ sender_email: "chrislowzhengxi@uchicago.edu"
 paths:
   cover_template: "cover_letter/templates/cover_letter.docx"
   cover_outdir: "cover_letter/outs"
-  email_log: "logs/sent_emails.csv"
-  email_template_dir: "email_templates"
-  contacts_csv: "data/contacts.csv"  # name, company, email, role, etc.
+  email_log: "outreach/sent_log.csv"
+  email_template_dir: "outreach/email_templates"
+  contacts_csv: "outreach/prospects.csv"  # name, company, email, role, etc.
 
 defaults:
   pdf: true

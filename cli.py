@@ -132,16 +132,17 @@ app.add_typer(email, name="email")
 
 @email.command("send")
 def email_send(
-    template: str = typer.Option(None, help="Which template file to use"),
+    template: str = typer.Option(None, help="Which template file to use (.txt/.md) or a directory of templates"),
     contacts: str = typer.Option(None, help="CSV of contacts to send to"),
     cc_myself: bool = typer.Option(None, help="CC me on every email"),
-    dry_run: bool = typer.Option(False, help="Preview without sending")
+    dry_run: bool = typer.Option(False, help="Preview without sending"),
 ):
+    # normalize OptionInfo -> real values or defaults
     template = _norm_opt(template, CFG.paths.email_template_dir)
     contacts = _norm_opt(contacts, CFG.paths.contacts_csv)
-    cc = CFG.defaults.cc_myself if cc_myself is None else cc_myself
+    cc = _norm_opt(cc_myself, CFG.defaults.cc_myself)
 
-    # Pick a template file interactively if a directory was passed
+    # ensure files/choices
     tpath = Path(template)
     if tpath.is_dir():
         choices = [p.name for p in tpath.glob("*.txt")] + [p.name for p in tpath.glob("*.md")]
@@ -151,13 +152,20 @@ def email_send(
         picked = inquirer.select(message="Choose an email template:", choices=choices).execute()
         template = str(tpath / picked)
 
-    # Wrap your existing mailer script. Adjust args to match your file.
+    if not Path(template).is_file():
+        typer.secho(f"Template not found: {template}", fg=typer.colors.RED)
+        raise typer.Exit(1)
+    if not Path(contacts).is_file():
+        typer.secho(f"Contacts CSV not found: {contacts}", fg=typer.colors.RED)
+        raise typer.Exit(1)
+
     cmd = [
-        "python3", "src/mailer_gmail.py",
+        sys.executable,  # use the same venv Python
+        "outreach/mailer_gmail.py",
         "--template", template,
         "--contacts", contacts,
-        "--cc", str(int(cc)),
-        "--log", CFG.paths.email_log
+        "--cc", "1" if cc else "0",
+        "--log", CFG.paths.email_log,
     ]
     if dry_run:
         cmd.append("--dry-run")
@@ -168,7 +176,7 @@ def email_send(
 @email.command("wizard")
 def email_wizard():
     """Pick template and recipients interactively, then send."""
-    email_send(dry_run=False)
+    email_send(dry_run=True)
 
 # ----- logs -----
 @app.command("log")

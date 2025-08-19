@@ -11,3 +11,7 @@ venv/
 # Build / outputs
 cover_letter/outs/
 coverletters/out/
+
+# Logs & generated files
+*.log
+outreach/sent_log.csv
