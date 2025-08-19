@@ -1,0 +1,13 @@
+sender_name: "Chris Low"
+sender_email: "chrislowzhengxi@uchicago.edu"
+
+paths:
+  cover_template: "cover_letter/templates/cover_letter.docx"
+  cover_outdir: "cover_letter/outs"
+  email_log: "outreach/sent_log.csv"
+  email_template_dir: "outreach/email_templates"
+  contacts_csv: "outreach/prospects.csv"  # name, company, email, role, etc.
+
+defaults:
+  pdf: true
+  cc_myself: false

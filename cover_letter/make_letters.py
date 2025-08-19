@@ -13,7 +13,11 @@ except ImportError:
     Document = None
 
 
-
+DEFAULT_ALWAYS_BOLD = [
+    "University of Chicago",
+    "Financial Markets Program",
+    "dual major in Computer Science and Economics",
+]
 COMPANY_RE  = re.compile(r"{{\s*company\s*}}")
 POSITION_RE = re.compile(r"{{\s*position\s*}}")
 
@@ -135,26 +139,30 @@ def render_docx_template(template_path: Path, context: dict, out_docx: Path, bol
     replace_in_docx(doc, context_local)
 
     # 2) Bold rules
-    ALWAYS_BOLD = bold_list or []
-    # Add the phrases you requested:
-    ALWAYS_BOLD = list(set(ALWAYS_BOLD + [
-        "University of Chicago",
-        "Financial Markets Program",
-        "dual major in Computer Science and Economics",
-    ]))
+    phrases = list(set((bold_list or []) + DEFAULT_ALWAYS_BOLD))
 
     # Pass 1: paragraphs
     for p in doc.paragraphs:
-        bold_phrases_and_first_sentence(p, ALWAYS_BOLD, bold_first_sentence=True)
+        bold_phrases_and_first_sentence(p, phrases, bold_first_sentence=True)
 
-    # Pass 2: tables (in case header lives in a table)
+    # Pass 2: tables
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
                 for p in cell.paragraphs:
-                    bold_phrases_and_first_sentence(p, ALWAYS_BOLD, bold_first_sentence=True)
+                    bold_phrases_and_first_sentence(p, phrases, bold_first_sentence=True)
 
     doc.save(str(out_docx))
+
+def render_text_template(template_path: Path, context: dict) -> str:
+    """Render a .txt/.md template. Prefer Jinja2 if available, else do simple {{company}} / {{position}} replace."""
+    s = template_path.read_text(encoding="utf-8")
+    if Template is not None:
+        return Template(s).render(**context)
+    # fallback: regex replace {{ company }} / {{ position }}
+    s = COMPANY_RE.sub(context.get("company", ""), s)
+    s = POSITION_RE.sub(context.get("position", ""), s)
+    return s
 
 
 def to_pdf_with_libreoffice(input_path: Path, out_dir: Path):
@@ -172,7 +180,7 @@ def main():
 
     tpl = Path(args.template)
     outdir = Path(args.outdir); outdir.mkdir(parents=True, exist_ok=True)
-    
+
     def generate_one(company: str, position: str = ""):
         safe = company.replace("/", "-").replace("\\", "-").strip()
         basename = f"Chris Low {safe} Cover Letter"
@@ -180,7 +188,7 @@ def main():
 
         if tpl.suffix.lower() == ".docx":
             out_docx = outdir / f"{basename}.docx"
-            render_docx_template(tpl, context, out_docx, bold_list=ALWAYS_BOLD)
+            render_docx_template(tpl, context, out_docx, bold_list=DEFAULT_ALWAYS_BOLD)
             if args.pdf:
                 out_pdf = outdir / f"{basename}.pdf"
                 convert(str(out_docx), str(out_pdf))
