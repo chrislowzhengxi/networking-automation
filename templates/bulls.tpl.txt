@@ -1,0 +1,11 @@
+Hi {first_name},
+
+I’m Chris Low, a senior at UChicago in CS and Econ. I also work as a Data Analyst with the Chicago Bulls, where I analyze player and game data in Python/SQL.
+
+I came across your work in {company}/{role} and would love to learn more about how you approach projects in this space.
+
+If you’re open to a quick chat, mornings or evenings US time usually work best for me.
+
+Best,
+Chris
+University of Chicago ’26

@@ -1,0 +1,12 @@
+Hi {first_name},
+
+I’m Chris Low, a senior at UChicago in CS and Econ. I saw your path at {company} and it really stood out.
+
+This summer I built APIs/dashboards at Wistron, and I’m now working as a Data Analyst with the Chicago Bulls. I’m interested in {role} role at {company} and would value any advice on the team or the process.
+
+If you’re open to a quick chat, mornings or evenings US time usually work best for me.
+
+Thanks,
+Chris
+chrislowzhengxi@uchicago.edu
+University of Chicago, Class of 2026
