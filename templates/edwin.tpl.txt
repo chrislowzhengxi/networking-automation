@@ -1,0 +1,13 @@
+Hi {first_name},
+
+Hope you're doing well! I’m Chris, a rising senior at UChicago majoring in CS and Econ. I came across your profile while exploring {company} and really admired your background and time there.
+
+I’ve cc’ed my twin brother Edwin, who’s studying Electrical and Computer Engineering at Rice. We’re both currently based in Taiwan for the summer and have been reflecting on how to apply our technical backgrounds in more finance and tech-driven settings. We thought we’d reach out together in case you’d be open to chatting about your journey and experience at {company}.
+
+I am really interested in the {role} role at {company}, and I’d love to hear any insights you might have on the culture or the work on the tech/engineering side.
+
+If you're open to a quick chat, we’re happy to work around your schedule — mornings or evenings US time work best for us.
+
+Thanks so much,  
+Chris Low  
+University of Chicago, Class of 2026
