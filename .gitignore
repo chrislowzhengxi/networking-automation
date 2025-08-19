@@ -1,2 +1,13 @@
-.env
+# macOS
+.DS_Store
+
+# Python
 __pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Build / outputs
+cover_letter/outs/
+coverletters/out/
