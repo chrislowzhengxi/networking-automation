@@ -1,7 +1,6 @@
 first_name,last_name,company,role,company_domain,cced,template
-Chris,Low,Rice,Janitor,rice.edu,True,uchicago
+Chris,Low,Rice,Janitor,rice.edu,True,bulls
 Alexandra,Klimova,Goldman Sachs,Asset Management,gs.com,False,bulls
 Qinwen,Zhai,Goldman Sachs,Quant Strats,gs.com,False,bulls
 Giacomo,Ieronutti,Goldman Sachs,Asset Management,gs.com,False,bulls
 Nila,Ramaswamy,Goldman Sachs,Asset Management,gs.com,False,bulls
-Mahdi,Alidina,Goldman Sachs,Asset Management,gs.com,False,bulls

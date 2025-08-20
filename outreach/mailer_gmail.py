@@ -74,6 +74,22 @@ def append_to_log_path(path: Path, key: str, cced: bool):
         w.writerow([key, "yes" if cced else "no"])
 
 
+# Fallback to prospects.csv first before going to the template 
+def resolve_template_path_for_row(row: dict, gui_tpl_path: Path) -> Path:
+    """
+    Prefer row['template'] (e.g., 'edwin') if present and found in the same folder
+    as gui_tpl_path. Otherwise fall back to gui_tpl_path.
+    """
+    p = Path(gui_tpl_path)
+    row_key = (row.get("template") or "").strip()
+    if row_key:
+        tpl_dir = p if p.is_dir() else p.parent
+        for ext in (".tpl.txt", ".txt", ".md"):
+            cand = tpl_dir / f"{row_key}{ext}"
+            if cand.is_file():
+                return cand
+    # fallback
+    return p
 
 # --------- End of adding feature 
 
@@ -233,18 +249,47 @@ def send_mail(recipient, subject, body, cced=False):
 #         time.sleep(delay)
 
 # ---- composition helpers for GUI ----
+# def compose_email_from_row(row: dict, tpl_path: Path, cc_default: bool) -> dict:
+#     """Return a dict with to, cc, subject, body, and dedupe key."""
+#     to_addr = f"{row['first_name'].lower()}.{row['last_name'].lower()}@{row['company_domain']}"
+#     cc_flag = is_truthy(row.get("cced")) if "cced" in row else cc_default
+#     subj = build_subject(row)
+#     tpl_text = load_template_from_path(tpl_path)
+#     try:
+#         body = tpl_text.format(**row)
+#     except KeyError as e:
+#         missing = str(e).strip("'")
+#         raise KeyError(
+#             f"Missing placeholder '{missing}' in CSV for template '{tpl_path.name}'. "
+#             f"Add column '{missing}' or remove it from the template."
+#         ) from e
+
+#     key = f"{row['first_name'].lower()}::{row['last_name'].lower()}::{row['company_domain'].lower()}"
+#     return {
+#         "key": key,
+#         "to": to_addr,
+#         "cc": ("el52@rice.edu" if cc_flag else None),
+#         "subject": subj,
+#         "body": body,
+#         "cc_flag": cc_flag,
+#     }
+
+
 def compose_email_from_row(row: dict, tpl_path: Path, cc_default: bool) -> dict:
-    """Return a dict with to, cc, subject, body, and dedupe key."""
     to_addr = f"{row['first_name'].lower()}.{row['last_name'].lower()}@{row['company_domain']}"
     cc_flag = is_truthy(row.get("cced")) if "cced" in row else cc_default
     subj = build_subject(row)
-    tpl_text = load_template_from_path(tpl_path)
+
+    # NEW: pick per-row template if available
+    chosen_tpl = resolve_template_path_for_row(row, tpl_path)
+    tpl_text = load_template_from_path(chosen_tpl)
+
     try:
         body = tpl_text.format(**row)
     except KeyError as e:
         missing = str(e).strip("'")
         raise KeyError(
-            f"Missing placeholder '{missing}' in CSV for template '{tpl_path.name}'. "
+            f"Missing placeholder '{missing}' in CSV for template '{chosen_tpl.name}'. "
             f"Add column '{missing}' or remove it from the template."
         ) from e
 
@@ -257,6 +302,7 @@ def compose_email_from_row(row: dict, tpl_path: Path, cc_default: bool) -> dict:
         "body": body,
         "cc_flag": cc_flag,
     }
+
 
 
 if __name__ == "__main__":
@@ -278,7 +324,7 @@ if __name__ == "__main__":
     TPL_PATH = Path(args.template)
     CONTACTS_PATH = Path(args.contacts)
     LOG_PATH = Path(args.log)
-    
+
     # sent log
     # If you have load_sent_log(path): use it. Otherwise use the wrapper above.
     sent_keys = load_sent_log_from_path(LOG_PATH)  # or load_sent_log(LOG_PATH)

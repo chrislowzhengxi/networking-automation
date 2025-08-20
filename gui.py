@@ -103,13 +103,149 @@ def preview_dialog(parent, msg: dict) -> str:
     return result["val"]
 
 
+# Editing prospects.csv
+class ContactsEditor(tk.Toplevel):
+    """Tiny CSV editor for prospects.csv (columns taken from file header)."""
+    def __init__(self, parent, csv_path: Path):
+        super().__init__(parent)
+        self.title(f"Edit Prospects — {csv_path.name}")
+        self.geometry("1000x560")
+        self.csv_path = csv_path
+
+        # read csv
+        with self.csv_path.open(newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            self.fieldnames = reader.fieldnames or [
+                "first_name","last_name","company","role","company_domain","cced","template"
+            ]
+            self.rows = [r for r in reader]
+
+        # layout
+        wrap = ttk.Frame(self, padding=10); wrap.pack(fill="both", expand=True)
+        left = ttk.Frame(wrap); left.pack(side="left", fill="both", expand=True)
+        right = ttk.Frame(wrap); right.pack(side="left", fill="y", padx=(10,0))
+
+        # table
+        self.tree = ttk.Treeview(left, columns=self.fieldnames, show="headings", height=16)
+        # for col in self.fieldnames:
+        #     self.tree.heading(col, text=col)
+        #     self.tree.column(col, width=170, minwidth=120, anchor="w", stretch=True)
+        for col in self.fieldnames:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=120, anchor="w")
+        self.tree.pack(fill="both", expand=True)
+        self._reload_tree()
+
+        # buttons under table
+        btns = ttk.Frame(left); btns.pack(fill="x", pady=(6,0))
+        ttk.Button(btns, text="Add", command=self._add_dialog).pack(side="left")
+        ttk.Button(btns, text="Edit", command=self._edit_dialog).pack(side="left", padx=6)
+        ttk.Button(btns, text="Delete", command=self._delete_selected).pack(side="left")
+        ttk.Button(btns, text="Save", command=self._save).pack(side="right")
+
+        # quick help / close
+        ttk.Label(right, text="Tips:\n• Double-click a row to Edit\n• cced is True/False\n• Save writes to CSV",
+                  justify="left").pack(anchor="nw")
+        ttk.Button(right, text="Close", command=self.destroy).pack(side="bottom", pady=8)
+
+        # dbl-click -> edit
+        self.tree.bind("<Double-1>", lambda e: self._edit_dialog())
+
+    def _reload_tree(self):
+        self.tree.delete(*self.tree.get_children())
+        for i, row in enumerate(self.rows):
+            values = [row.get(k, "") for k in self.fieldnames]
+            self.tree.insert("", "end", iid=str(i), values=values)
+
+    def _selected_index(self):
+        sel = self.tree.selection()
+        return int(sel[0]) if sel else None
+
+    def _delete_selected(self):
+        idx = self._selected_index()
+        if idx is None: return
+        del self.rows[idx]
+        self._reload_tree()
+
+    def _save(self):
+        # normalize booleans for 'cced'
+        for r in self.rows:
+            if "cced" in r:
+                v = str(r.get("cced", "")).strip().lower()
+                r["cced"] = "True" if v in ("true","1","yes","y","t") else "False"
+        with self.csv_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=self.fieldnames)
+            writer.writeheader()
+            writer.writerows(self.rows)
+        messagebox.showinfo("Saved", f"Saved {len(self.rows)} rows to:\n{self.csv_path}")
+
+    # ---- dialogs ----
+    def _row_dialog(self, title, initial=None):
+        d = tk.Toplevel(self); d.title(title); d.transient(self); d.grab_set()
+        frm = ttk.Frame(d, padding=10); frm.grid(sticky="nsew")
+        inputs = {}
+        for i, key in enumerate(self.fieldnames):
+            ttk.Label(frm, text=key).grid(row=i, column=0, sticky="w", pady=3)
+            if key == "cced":
+                var = tk.BooleanVar(value=str((initial or {}).get(key, "")).strip().lower() in ("true","1","yes","y","t"))
+                w = ttk.Checkbutton(frm, variable=var)
+                w.var = var
+            else:
+                var = tk.StringVar(value=(initial or {}).get(key, ""))
+                w = ttk.Entry(frm, textvariable=var, width=40)
+                w.var = var
+            w.grid(row=i, column=1, sticky="we", pady=3)
+            inputs[key] = w
+        frm.columnconfigure(1, weight=1)
+
+        res = {"ok": False, "data": None}
+        def ok():
+            data = {}
+            for k, w in inputs.items():
+                if k == "cced":
+                    data[k] = "True" if w.var.get() else "False"
+                else:
+                    data[k] = w.var.get().strip()
+            # minimal validation
+            req = ["first_name","last_name","company","role","company_domain","template"]
+            missing = [k for k in req if not data.get(k)]
+            if missing:
+                messagebox.showerror("Missing", f"Required: {', '.join(missing)}", parent=d)
+                return
+            res["ok"] = True; res["data"] = data; d.destroy()
+
+        def cancel():
+            d.destroy()
+
+        btns = ttk.Frame(frm); btns.grid(row=len(self.fieldnames), column=0, columnspan=2, sticky="e", pady=(8,0))
+        ttk.Button(btns, text="Cancel", command=cancel).pack(side="right")
+        ttk.Button(btns, text="OK", command=ok).pack(side="right", padx=6)
+        d.wait_window()
+        return res
+
+    def _add_dialog(self):
+        res = self._row_dialog("Add prospect")
+        if res["ok"]:
+            self.rows.append(res["data"])
+            self._reload_tree()
+
+    def _edit_dialog(self):
+        idx = self._selected_index()
+        if idx is None: return
+        res = self._row_dialog("Edit prospect", initial=self.rows[idx])
+        if res["ok"]:
+            self.rows[idx] = res["data"]
+            self._reload_tree()
+
+
+
 # ---------- GUI ----------
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Networking Automation")
-        self.geometry("640x420")
-        self.minsize(620, 380)
+        self.geometry("980x600")
+        self.minsize(800, 540)
 
         nb = ttk.Notebook(self)
         self.cover_tab = ttk.Frame(nb)
@@ -234,7 +370,7 @@ class App(tk.Tk):
     def _build_email(self):
         frm = self.email_tab
 
-        ttk.Label(frm, text="Email template file:").grid(row=0, column=0, sticky="w", pady=6)
+        ttk.Label(frm, text="Email template file (Fallback):").grid(row=0, column=0, sticky="w", pady=6)
         # self.email_tpl_var = tk.StringVar(value=CFG["paths"]["email_template_dir"])
         self.email_tpl_var = tk.StringVar(value="outreach/email_templates/bulls.tpl.txt")
         ttk.Entry(frm, textvariable=self.email_tpl_var, width=52).grid(row=0, column=1, sticky="we")
@@ -253,6 +389,12 @@ class App(tk.Tk):
         btns = ttk.Frame(frm); btns.grid(row=4, column=0, columnspan=3, sticky="e", pady=10)
         ttk.Button(btns, text="Send Emails", command=self._send_emails).pack(side="left", padx=6)
         ttk.Button(btns, text="Open Log", command=self._open_email_log).pack(side="left", padx=6)
+
+        # NEW: edit/view prospects
+        quick = ttk.Frame(frm); quick.grid(row=5, column=0, columnspan=3, sticky="w", pady=4)
+        ttk.Button(quick, text="Edit Prospects", command=self._edit_prospects).pack(side="left", padx=6)
+        ttk.Button(quick, text="Open Prospects in Finder", command=self._open_contacts_csv).pack(side="left", padx=6)
+
 
         for c in range(3):
             frm.grid_columnconfigure(c, weight=1)
@@ -377,6 +519,20 @@ class App(tk.Tk):
         except Exception as e:
             self.status_var.set("Error.")
             messagebox.showerror("Error", f"{e}\n\n{traceback.format_exc()}")
+
+    # Open contacts CSV for editing
+    def _edit_prospects(self):
+        csv_path = Path(self.contacts_var.get()).expanduser()
+        if not csv_path.is_file():
+            messagebox.showerror("Not found", f"Contacts CSV not found:\n{csv_path}"); return
+        ContactsEditor(self, csv_path)
+
+    def _open_contacts_csv(self):
+        csv_path = Path(self.contacts_var.get()).expanduser()
+        if not csv_path.exists():
+            messagebox.showerror("Not found", f"Contacts CSV not found:\n{csv_path}"); return
+        open_in_finder(csv_path)
+
 
 
 
