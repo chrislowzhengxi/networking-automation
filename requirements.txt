@@ -6,3 +6,4 @@ rich
 InquirerPy
 pydantic
 pyyaml
+python-docx
